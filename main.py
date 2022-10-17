@@ -24,10 +24,10 @@ done = False
 clock = pygame.time.Clock()
 
 
-Room1 = Room('1.txt', 'SpriteSheet.png')
-Room2Top = Room('2Top.txt', 'SpriteSheet.png')
-Room2NoTop = Room('2NoTop.txt', 'SpriteSheet.png')
-Room3 = Room('3.txt', 'SpriteSheet.png')
+Room1 = Room('rooms/1.txt','SpriteSheet.png',hasBottomExit=False,hasTopExit=False)
+Room2Top = Room('rooms/2Top.txt','SpriteSheet.png',hasBottomExit=True,hasTopExit=True)
+Room2NoTop = Room('rooms/2NoTop.txt','SpriteSheet.png',hasBottomExit=True,hasTopExit=False)
+Room3 = Room('rooms/3.txt','SpriteSheet.png',hasBottomExit=False,hasTopExit=True)
 # -------- Main Program Loop -----------
 d1 = True
 d2=False

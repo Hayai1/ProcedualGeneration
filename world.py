@@ -1,4 +1,3 @@
-from os import getrandom
 import pygame
 import random
 from copy import deepcopy
@@ -15,7 +14,7 @@ class SpriteSheet:
         image = pygame.Surface(rect.size).convert()
         image.blit(self.sheet, (0, 0), rect)
         if colorkey is not None:
-            if colorkey is -1:
+            if colorkey == -1:
                 colorkey = image.get_at((0,0))
             image.set_colorkey(colorkey, pygame.RLEACCEL)
         return image
@@ -98,26 +97,34 @@ class mapGenerator:
     currentPos = []
     MAPWIDTH = 4
     MAPHEIGHT = 4
-    def __init__(self, spriteSheet,Room1='1.txt', Room2WithTop='2Top.txt', Room2WithNoTop='2NoTop.txt', Room3='3.txt'):
-        self.Room1          = Room(Room1          ,spriteSheet ,False ,False)
-        self.Room2WithTop   = Room(Room2WithTop   ,spriteSheet ,True  ,True )
-        self.Room2WithNoTop = Room(Room2WithNoTop ,spriteSheet ,True  ,False)
-        self.Room3          = Room(Room3          ,spriteSheet ,False ,False)
-        self.generateNewLevel()
+    def __init__(self, spriteSheetPath,Room1s=['1.txt'], Room2sWithTop=['2Top.txt'], Room2sWithNoTop=['2NoTop.txt'], Room3s=['3.txt']):
+        self.spriteSheetPath = spriteSheetPath
+        self.Room1Paths = Room1s
+        self.Room2sWithNoTopPaths = Room2sWithNoTop
+        self.Room2sWithTopPaths = Room2sWithTop
+        self.Room3paths = Room3s
 
+
+    def getNewRoom1(self):
+        return Room(self.Room1Paths[0],self.spriteSheetPath,False,False)
+    def getNewRoom2WithNoTop(self):
+        return Room(self.Room2sWithNoTopPaths[0],self.spriteSheetPath,False,False)
+    def getNewRoom2WithTop(self):
+        return Room(self.Room2sWithTopPaths[0],self.spriteSheetPath,False,False)
+    def getNewRoom3(self):
+        return Room(self.Room3paths[0],self.spriteSheetPath,False,False)
 
     def getRandomNumber(self,a,b):
-        return random.randint(a,b)
+        return random.uniform(a,b)
 
 
     def generateNewLevel(self):
         StartRoomNum = self.getRandomNumber(1,2)
         if StartRoomNum == 1:
-            startRoom = deepcopy(self.Room1)
+            startRoom = self.getNewRoom1()
         elif StartRoomNum == 2:
-            startRoom = deepcopy(self.Room2WithNoTop)
+            startRoom = self.getNewRoom2WithNoTop()
         self.currentPos = [StartRoomNum,0]
-        self.level.append(currentLevel)
         nextLoc = self.getRandomNumber(1,5)
         moveLeft = False
         moveRight = False
@@ -152,6 +159,7 @@ class mapGenerator:
             newCurrentPos = [self.currentPos[0],self.currentPos[1]-1]
         self.level.append([currentLevel, self.currentPos])
         self.currentPos = newCurrentPos
+        
         '''
         TODO test this
         then work more from http://tinysubversions.com/spelunkyGen/
