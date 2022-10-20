@@ -1,6 +1,6 @@
-from contextlib import nullcontext
 import pygame
 import random
+import numpy
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -27,11 +27,12 @@ class Room:
 
 class worldGeneration:
     rooms = []
-    currentPosition = [400,0]
+    currentPosition = [0,0]
     def __init__(self,roomAmount):
         self.roomAmount = roomAmount
         
     def genWorld(self):
+        for i in range(0,self.roomAmount):
             rndNum = random.randint(1,10)
             rndNumDown = random.randint(1,2)
             rndNumup = random.randint(1,5)
@@ -47,8 +48,7 @@ class worldGeneration:
                         else:
                             findingEmptySpace = False
                             break
-                self.currentPosition = newPos
-                self.rooms.append(newPos)
+
             elif rndNum == 5 or rndNum == 6 or rndNum == 7 or rndNum == 8:#right
                 newPos = [self.currentPosition[0]+10,self.currentPosition[1]]
                 while findingEmptySpace:
@@ -60,8 +60,7 @@ class worldGeneration:
                         else:
                             findingEmptySpace = False
                             break
-                self.currentPosition = newPos
-                self.rooms.append(newPos)
+
             elif rndNum == 9 and rndNumDown == 1:#down
                 newPos = [self.currentPosition[0],self.currentPosition[1]+10]
                 while findingEmptySpace:
@@ -73,9 +72,7 @@ class worldGeneration:
                         else:
                             findingEmptySpace = False
                             break
-                self.currentPosition = newPos
-                self.rooms.append(newPos)
-            
+
             elif rndNum == 10 and rndNumup == 2:#up
                 newPos = [self.currentPosition[0],self.currentPosition[1]-10]
                 while findingEmptySpace:
@@ -87,31 +84,27 @@ class worldGeneration:
                         else:
                             findingEmptySpace = False
                             break
-                self.currentPosition = newPos
-                self.rooms.append(newPos)
+
+            self.currentPosition = newPos
+            self.rooms.append([newPos[0]*3,newPos[1]*3])
                 
 
 
 worldgen = worldGeneration(300)
 worldgen.genWorld()
-worldgen.genWorld()
 print(worldgen.rooms)
+WorldGenDone = False
 # -------- Main Program Loop -----------
 while not done:
     # --- Main event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
- 
+    if WorldGenDone:
+        pass    
     screen.fill(WHITE)
     pygame.draw.lines(screen,RED,False,worldgen.rooms)
-    worldgen.genWorld()
-    print(len(worldgen.rooms))
-    '''if len(worldgen.rooms) > 500:
-        worldgen.rooms = []
-        worldgen.currentPosition = [400,0]
-        worldgen.genWorld()
-        worldgen.genWorld()'''
+        
     pygame.display.flip()
     
     # --- Limit to 60 frames per second

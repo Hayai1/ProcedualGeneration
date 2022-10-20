@@ -1,14 +1,11 @@
 
- 
-
+from turtle import down, right, up
 import pygame
+import random
+import numpy
+
 from world import Room
 # Define some colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
- 
 pygame.init()
  
 # Set the width and height of the screen [width, height]
@@ -21,58 +18,182 @@ pygame.display.set_caption("My Game")
 done = False
  
 # Used to manage how fast the screen updates
+
 clock = pygame.time.Clock()
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+ROOMPATHS = {
+    '1' : Room('ProcedualGeneration/rooms/1.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
+    '2NoTop' : Room('ProcedualGeneration/rooms/2NoTop.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
+    '2Top' : Room('ProcedualGeneration/rooms/2Top.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
+    '3' : Room('ProcedualGeneration/rooms/3.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
+} 
+Surface = pygame.Surface((50*320,50*96))
 
 
-Room1 = Room('rooms/1.txt','SpriteSheet.png',hasBottomExit=False,hasTopExit=False)
-Room2Top = Room('rooms/2Top.txt','SpriteSheet.png',hasBottomExit=True,hasTopExit=True)
-Room2NoTop = Room('rooms/2NoTop.txt','SpriteSheet.png',hasBottomExit=True,hasTopExit=False)
-Room3 = Room('rooms/3.txt','SpriteSheet.png',hasBottomExit=False,hasTopExit=True)
+class worldGeneration:
+    rooms = []
+    roomsToBlit = []
+    currentPosition = [1,0]
+    def __init__(self,roomAmount):
+        self.roomAmount = roomAmount
+        
+    def genWorld(self):
+        #for i in range(0,self.roomAmount):
+            a = 96
+            b = 320
+            rndNum = random.randint(1,5)
+            #rndNumDown = random.randint(1,2)
+            #rndNumup = random.randint(1,5)
+            findingEmptySpace = True
+            if rndNum == 1 or rndNum == 2:#left
+                newPos = [self.currentPosition[0]-1,self.currentPosition[1]]
+                while findingEmptySpace:
+                    while findingEmptySpace:
+                        findingEmptySpace = False
+                        if self.rooms == []:
+                            break
+                        for room in self.rooms:
+                            room = [room[0]/b,room[1]/a]
+                            if newPos == room:
+                                print("dfs")
+                                newPos = [newPos[0]-1,newPos[1]]
+                                findingEmptySpace = True
+                                break
+                        
+                
+                if newPos[0] >= 0 and newPos[1] >= 0:
+                    self.currentPosition = newPos
+                    self.rooms.append([newPos[0]*b,newPos[1]*a])
+                    self.roomsToBlit.append([ROOMPATHS['1'].room,(newPos[0]*b,newPos[1]*a)])
+            
+            elif rndNum == 3 or rndNum ==4 :#right
+                newPos = [self.currentPosition[0]+1,self.currentPosition[1]]
+                while findingEmptySpace:
+                    findingEmptySpace = False
+                    if self.rooms == []:
+                        break
+                    for room in self.rooms:
+                        room = [room[0]/b,room[1]/a]
+                        if newPos == room:
+                            print("dfs")
+
+                            newPos = [newPos[0]+1,newPos[1]]
+                            findingEmptySpace = True
+                            break
+   
+                if newPos[0] >= 0 and newPos[1] >= 0:
+                    self.currentPosition = newPos
+                    self.rooms.append([newPos[0]*b,newPos[1]*a])
+                    self.roomsToBlit.append([ROOMPATHS['1'].room,(newPos[0]*b,newPos[1]*a)])
+            elif rndNum == 5:#down
+                newPos = [self.currentPosition[0],self.currentPosition[1]+1]
+                while findingEmptySpace:
+                    findingEmptySpace = False
+                    if self.rooms == []:
+                        break
+                    for room in self.rooms:
+                        if newPos == room:
+                            newPos = [newPos[0],newPos[1]+1]
+                            findingEmptySpace = True
+                            break
+                        
+                if newPos[0] >= 0 and newPos[1] >= 0:
+                    #if len(self.rooms) > 1:
+                     #   self.rooms[i-1] = self.rooms[i-1]
+                      #  self.roomsToBlit[i-1] = [ROOMPATHS['3'].room,(newPos[0]*b,newPos[1]*a)]
+                    self.currentPosition = newPos
+                    self.rooms.append([newPos[0]*b,newPos[1]*a])
+                    self.roomsToBlit.append([ROOMPATHS['2Top'].room,(newPos[0]*b,newPos[1]*a)])
+            print(newPos)
+            '''
+            elif rndNum == 10 and rndNumup == 2:#up
+                newPos = [self.currentPosition[0],self.currentPosition[1]-1]
+                while findingEmptySpace:
+                    if self.rooms == []:
+                        break
+                    for room in self.rooms:
+                        if newPos == room:
+                            newPos = [newPos[0],newPos[1]-1]
+                        else:
+                            findingEmptySpace = False
+                            break
+                if newPos[0] >= 0 and newPos[1] >= 0:
+                    self.currentPosition = newPos
+                    self.rooms.append([newPos[0]*b,newPos[1]*a])
+                    self.roomsToBlit.append([ROOMPATHS['2NoTop'].room,(newPos[0]*b,newPos[1]*a)])
+            '''
+
+
+worldgen = worldGeneration(500)
+worldgen.genWorld()
+worldgen.genWorld()
+frame = 0
+WorldGenDone = False
+counter = 1
+x = 0
+y = 0
+left = False
+Right= False
+Up = False
+down = False
 # -------- Main Program Loop -----------
-d1 = True
-d2=False
-d3=False
-d4=False
 while not done:
+    screen.fill(BLACK)
     # --- Main event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_1:
-                d1= True
-                d2=False
-                d3=False
-                d4=False
-            if event.key == pygame.K_2:
-                d1 = False
-                d2=True
-                d3=False
-                d4=False
-            if event.key == pygame.K_3:
-                d1= False
-                d2=False
-                d3=True
-                d4=False
-            if event.key == pygame.K_4:
-                d1= False
-                d2=False
-                d3=False
-                d4=True
-    screen.fill(WHITE)
+            if event.key == pygame.K_LEFT:
+                left = True
+            if event.key == pygame.K_RIGHT:
+                Right = True
+            if event.key == pygame.K_DOWN:
+                down = True
+            if event.key == pygame.K_UP:
+                Up = True
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                left = False
+
+            if event.key == pygame.K_RIGHT:
+                Right= False
+
+            if event.key == pygame.K_DOWN:
+                down = False
+
+            if event.key == pygame.K_UP:
+                Up = False
+
+    if left:
+        x=x+50
+    if Right:
+        x = x - 50
+    if down:
+        y = y -50
+    if Up:
+        y = y + 50
+    Surface.fill(WHITE)
+    frame += 1
+    if frame == 50:
+        frame = 0
+        worldgen.genWorld()
     
-    x,y = pygame.mouse.get_pos()
+    for room in worldgen.roomsToBlit:
+        Surface.blit(room[0],room[1])
+    pygame.draw.lines(Surface,RED,False,worldgen.rooms)
+    
+    for i in worldgen.rooms:
+        pygame.draw.rect(Surface, GREEN,pygame.Rect(i[0],i[1],5,5))
+
+    #y=y-1
+    screen.blit(Surface,(x,y))
     # --- Limit to 60 frames per second
-    if d1:
-        screen.blit(Room1.room,(x,y))
-    elif d2:
-        screen.blit(Room2Top.room,(x,y))
-    elif d3:
-        screen.blit(Room2NoTop.room,(x,y))
-    elif d4:
-        screen.blit(Room3.room,(x,y))
     pygame.display.update()
     clock.tick(60)
-
+    
 # Close the window and quit.
 pygame.quit()
