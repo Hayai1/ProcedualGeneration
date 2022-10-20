@@ -1,8 +1,8 @@
 
-from turtle import down, right, up
+
 import pygame
 import random
-import numpy
+
 
 from world import Room
 # Define some colors
@@ -102,7 +102,11 @@ class worldGeneration:
                         
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     if len(self.roomsToBlit)-2 > 0:
-                        self.roomsToBlit[len(self.roomsToBlit)-1][0] = ROOMPATHS['2NoTop'].room
+                        aboveRoom = self.roomsToBlit[len(self.roomsToBlit)-1]
+                        if aboveRoom[0] == ROOMPATHS['1'].room:
+                            self.roomsToBlit[len(self.roomsToBlit)-1][0] = ROOMPATHS['2NoTop'].room
+                        elif aboveRoom[0] == ROOMPATHS['3'].room:
+                            self.roomsToBlit[len(self.roomsToBlit)-1][0] = ROOMPATHS['2Top'].room
                     self.currentPosition = newPos
                     self.rooms.append([newPos[0]*b,newPos[1]*a])
                     self.roomsToBlit.append([ROOMPATHS['3'].room,(newPos[0]*b,newPos[1]*a)])
