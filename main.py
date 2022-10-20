@@ -41,7 +41,7 @@ class worldGeneration:
         self.roomAmount = roomAmount
         
     def genWorld(self):
-        #for i in range(0,self.roomAmount):
+        for i in range(0,self.roomAmount):
             a = 96
             b = 320
             rndNum = random.randint(1,5)
@@ -101,12 +101,11 @@ class worldGeneration:
                             break
                         
                 if newPos[0] >= 0 and newPos[1] >= 0:
-                    #if len(self.rooms) > 1:
-                     #   self.rooms[i-1] = self.rooms[i-1]
-                      #  self.roomsToBlit[i-1] = [ROOMPATHS['3'].room,(newPos[0]*b,newPos[1]*a)]
+                    if len(self.roomsToBlit)-2 > 0:
+                        self.roomsToBlit[len(self.roomsToBlit)-1][0] = ROOMPATHS['2NoTop'].room
                     self.currentPosition = newPos
                     self.rooms.append([newPos[0]*b,newPos[1]*a])
-                    self.roomsToBlit.append([ROOMPATHS['2Top'].room,(newPos[0]*b,newPos[1]*a)])
+                    self.roomsToBlit.append([ROOMPATHS['3'].room,(newPos[0]*b,newPos[1]*a)])
             print(newPos)
             '''
             elif rndNum == 10 and rndNumup == 2:#up
@@ -127,8 +126,7 @@ class worldGeneration:
             '''
 
 
-worldgen = worldGeneration(500)
-worldgen.genWorld()
+worldgen = worldGeneration(50)
 worldgen.genWorld()
 frame = 0
 WorldGenDone = False
@@ -178,9 +176,7 @@ while not done:
         y = y + 50
     Surface.fill(WHITE)
     frame += 1
-    if frame == 50:
-        frame = 0
-        worldgen.genWorld()
+
     
     for room in worldgen.roomsToBlit:
         Surface.blit(room[0],room[1])
