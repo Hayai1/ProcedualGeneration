@@ -45,8 +45,6 @@ class worldGeneration:
             a = 96
             b = 320
             rndNum = random.randint(1,5)
-            #rndNumDown = random.randint(1,2)
-            #rndNumup = random.randint(1,5)
             findingEmptySpace = True
             if rndNum == 1 or rndNum == 2:#left
                 newPos = [self.currentPosition[0]-1,self.currentPosition[1]]
@@ -58,17 +56,13 @@ class worldGeneration:
                         for room in self.rooms:
                             room = [room[0]/b,room[1]/a]
                             if newPos == room:
-                                print("dfs")
                                 newPos = [newPos[0]-1,newPos[1]]
                                 findingEmptySpace = True
                                 break
-                        
-                
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     self.currentPosition = newPos
                     self.rooms.append([newPos[0]*b,newPos[1]*a])
                     self.roomsToBlit.append([ROOMPATHS['1'].room,(newPos[0]*b,newPos[1]*a)])
-            
             elif rndNum == 3 or rndNum ==4 :#right
                 newPos = [self.currentPosition[0]+1,self.currentPosition[1]]
                 while findingEmptySpace:
@@ -78,12 +72,10 @@ class worldGeneration:
                     for room in self.rooms:
                         room = [room[0]/b,room[1]/a]
                         if newPos == room:
-                            print("dfs")
 
                             newPos = [newPos[0]+1,newPos[1]]
                             findingEmptySpace = True
                             break
-   
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     self.currentPosition = newPos
                     self.rooms.append([newPos[0]*b,newPos[1]*a])
@@ -98,8 +90,7 @@ class worldGeneration:
                         if newPos == room:
                             newPos = [newPos[0],newPos[1]+1]
                             findingEmptySpace = True
-                            break
-                        
+                            break    
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     if len(self.roomsToBlit)-2 > 0:
                         aboveRoom = self.roomsToBlit[len(self.roomsToBlit)-1]
@@ -110,31 +101,9 @@ class worldGeneration:
                     self.currentPosition = newPos
                     self.rooms.append([newPos[0]*b,newPos[1]*a])
                     self.roomsToBlit.append([ROOMPATHS['3'].room,(newPos[0]*b,newPos[1]*a)])
-            print(newPos)
-            '''
-            elif rndNum == 10 and rndNumup == 2:#up
-                newPos = [self.currentPosition[0],self.currentPosition[1]-1]
-                while findingEmptySpace:
-                    if self.rooms == []:
-                        break
-                    for room in self.rooms:
-                        if newPos == room:
-                            newPos = [newPos[0],newPos[1]-1]
-                        else:
-                            findingEmptySpace = False
-                            break
-                if newPos[0] >= 0 and newPos[1] >= 0:
-                    self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*b,newPos[1]*a])
-                    self.roomsToBlit.append([ROOMPATHS['2NoTop'].room,(newPos[0]*b,newPos[1]*a)])
-            '''
-
-
 worldgen = worldGeneration(50)
 worldgen.genWorld()
 frame = 0
-WorldGenDone = False
-counter = 1
 x = 0
 y = 0
 left = False
