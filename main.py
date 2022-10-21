@@ -1,115 +1,29 @@
-
-
 import pygame
-import random
+from world import worldGeneration
 
-
-from world import Room
-# Define some colors
-pygame.init()
- 
-# Set the width and height of the screen [width, height]
-size = (700, 500)
-screen = pygame.display.set_mode(size)
- 
-pygame.display.set_caption("My Game")
- 
-# Loop until the user clicks the close button.
-done = False
- 
-# Used to manage how fast the screen updates
-
-clock = pygame.time.Clock()
+WINDOW_SIZE = (700,500)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
-ROOMPATHS = {
-    '1' : Room('ProcedualGeneration/rooms/1.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
-    '2NoTop' : Room('ProcedualGeneration/rooms/2NoTop.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
-    '2Top' : Room('ProcedualGeneration/rooms/2Top.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
-    '3' : Room('ProcedualGeneration/rooms/3.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
-} 
-Surface = pygame.Surface((50*320,50*96))
 
-
-class worldGeneration:
-    rooms = []
-    roomsToBlit = []
-    currentPosition = [1,0]
-    def __init__(self,roomAmount):
-        self.roomAmount = roomAmount
-        
-    def genWorld(self):
-        for i in range(0,self.roomAmount):
-            a = 96
-            b = 320
-            rndNum = random.randint(1,5)
-            findingEmptySpace = True
-            if rndNum == 1 or rndNum == 2:#left
-                newPos = [self.currentPosition[0]-1,self.currentPosition[1]]
-                while findingEmptySpace:
-                    while findingEmptySpace:
-                        findingEmptySpace = False
-                        if self.rooms == []:
-                            break
-                        for room in self.rooms:
-                            room = [room[0]/b,room[1]/a]
-                            if newPos == room:
-                                newPos = [newPos[0]-1,newPos[1]]
-                                findingEmptySpace = True
-                                break
-                if newPos[0] >= 0 and newPos[1] >= 0:
-                    self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*b,newPos[1]*a])
-                    self.roomsToBlit.append([ROOMPATHS['1'].room,(newPos[0]*b,newPos[1]*a)])
-            elif rndNum == 3 or rndNum ==4 :#right
-                newPos = [self.currentPosition[0]+1,self.currentPosition[1]]
-                while findingEmptySpace:
-                    findingEmptySpace = False
-                    if self.rooms == []:
-                        break
-                    for room in self.rooms:
-                        room = [room[0]/b,room[1]/a]
-                        if newPos == room:
-
-                            newPos = [newPos[0]+1,newPos[1]]
-                            findingEmptySpace = True
-                            break
-                if newPos[0] >= 0 and newPos[1] >= 0:
-                    self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*b,newPos[1]*a])
-                    self.roomsToBlit.append([ROOMPATHS['1'].room,(newPos[0]*b,newPos[1]*a)])
-            elif rndNum == 5:#down
-                newPos = [self.currentPosition[0],self.currentPosition[1]+1]
-                while findingEmptySpace:
-                    findingEmptySpace = False
-                    if self.rooms == []:
-                        break
-                    for room in self.rooms:
-                        if newPos == room:
-                            newPos = [newPos[0],newPos[1]+1]
-                            findingEmptySpace = True
-                            break    
-                if newPos[0] >= 0 and newPos[1] >= 0:
-                    if len(self.roomsToBlit)-2 > 0:
-                        aboveRoom = self.roomsToBlit[len(self.roomsToBlit)-1]
-                        if aboveRoom[0] == ROOMPATHS['1'].room:
-                            self.roomsToBlit[len(self.roomsToBlit)-1][0] = ROOMPATHS['2NoTop'].room
-                        elif aboveRoom[0] == ROOMPATHS['3'].room:
-                            self.roomsToBlit[len(self.roomsToBlit)-1][0] = ROOMPATHS['2Top'].room
-                    self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*b,newPos[1]*a])
-                    self.roomsToBlit.append([ROOMPATHS['3'].room,(newPos[0]*b,newPos[1]*a)])
+pygame.init()
+screen = pygame.display.set_mode(WINDOW_SIZE)
+pygame.display.set_caption("My Game")
+clock = pygame.time.Clock()
+Surface = pygame.Surface((300,200))
 worldgen = worldGeneration(50)
-worldgen.genWorld()
-frame = 0
+worldgen.genWorld() 
+ 
+done = False
 x = 0
 y = 0
 left = False
 Right= False
 Up = False
 down = False
+true_scroll = [0,0]
+
 # -------- Main Program Loop -----------
 while not done:
     screen.fill(BLACK)
@@ -129,37 +43,34 @@ while not done:
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 left = False
-
             if event.key == pygame.K_RIGHT:
                 Right= False
-
             if event.key == pygame.K_DOWN:
                 down = False
-
             if event.key == pygame.K_UP:
                 Up = False
+                
+    true_scroll[0] += (x-true_scroll[0])
+    true_scroll[1] += (y-true_scroll[1])
+    scroll = true_scroll.copy()
+    scroll[0] = int(scroll[0])
+    scroll[1] = int(scroll[1])
 
     if left:
-        x=x+50
+        x=x-10
     if Right:
-        x = x - 50
+        x = x + 10
     if down:
-        y = y -50
+        y = y +10
     if Up:
-        y = y + 50
+        y = y - 10
     Surface.fill(WHITE)
-    frame += 1
+   
 
-    
     for room in worldgen.roomsToBlit:
-        Surface.blit(room[0],room[1])
-    pygame.draw.lines(Surface,RED,False,worldgen.rooms)
+        Surface.blit(room[0],(room[1][0]-scroll[0],room[1][1]-scroll[1]))
+    screen.blit(pygame.transform.scale(Surface,WINDOW_SIZE),(0,0))
     
-    for i in worldgen.rooms:
-        pygame.draw.rect(Surface, GREEN,pygame.Rect(i[0],i[1],5,5))
-
-    #y=y-1
-    screen.blit(Surface,(x,y))
     # --- Limit to 60 frames per second
     pygame.display.update()
     clock.tick(60)

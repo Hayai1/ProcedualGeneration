@@ -1,12 +1,8 @@
 import pygame
 import random
-from copy import deepcopy
 BLACK = (0, 0, 0)
 
 class SpriteSheet:
-    
-
-
     def image_at(self, rectangle, colorkey = None):
         """Load a specific image from a specific rectangle."""
         # Loads image from x, y, x+offset, y+offset.
@@ -92,76 +88,79 @@ class Room(SpriteSheet):
             surface.blit(i[0], i[1])
         return surface
     
-class mapGenerator:
-    level = []
-    currentPos = []
-    MAPWIDTH = 4
-    MAPHEIGHT = 4
-    def __init__(self, spriteSheetPath,Room1s=['1.txt'], Room2sWithTop=['2Top.txt'], Room2sWithNoTop=['2NoTop.txt'], Room3s=['3.txt']):
-        self.spriteSheetPath = spriteSheetPath
-        self.Room1Paths = Room1s
-        self.Room2sWithNoTopPaths = Room2sWithNoTop
-        self.Room2sWithTopPaths = Room2sWithTop
-        self.Room3paths = Room3s
 
-
-    def getNewRoom1(self):
-        return Room(self.Room1Paths[0],self.spriteSheetPath,False,False)
-    def getNewRoom2WithNoTop(self):
-        return Room(self.Room2sWithNoTopPaths[0],self.spriteSheetPath,False,False)
-    def getNewRoom2WithTop(self):
-        return Room(self.Room2sWithTopPaths[0],self.spriteSheetPath,False,False)
-    def getNewRoom3(self):
-        return Room(self.Room3paths[0],self.spriteSheetPath,False,False)
-
-    def getRandomNumber(self,a,b):
-        return random.uniform(a,b)
-
-
-    def generateNewLevel(self):
-        StartRoomNum = self.getRandomNumber(1,2)
-        if StartRoomNum == 1:
-            startRoom = self.getNewRoom1()
-        elif StartRoomNum == 2:
-            startRoom = self.getNewRoom2WithNoTop()
-        self.currentPos = [StartRoomNum,0]
-        nextLoc = self.getRandomNumber(1,5)
-        moveLeft = False
-        moveRight = False
-        moveDown = False
-        if (nextLoc == 1 or nextLoc == 2):  
-            if self.currentPos[0] > 3:
-                moveRight = True
-                moveDown = True
-            else:
-                moveLeft = True
-        elif (nextLoc == 3 or nextLoc == 4):
-            if self.currentPos[0] > 3:
-                moveDown = True
-                moveLeft=True
-            else:
-                moveRight = True
-        elif (nextLoc == 5):
-            if self.currentPos[1] > 3:
-                pass
-            else:
-                moveDown = True
-        if (moveRight):
-            newCurrentPos = [self.currentPos[0]+1,self.currentPos[1]]
-        if (moveLeft):
-            newCurrentPos = [self.currentPos[0]-1,self.currentPos[1]]
-        if (moveDown):
-            if (not currentLevel.hasBottomExit):#change the room so that it has a bottom exit
-                if (currentLevel.hasTopExit):
-                    currentLevel = deepcopy(self.Room2WithTop)
-                else: 
-                    currentLevel = deepcopy(self.Room2WithNoTop)
-            newCurrentPos = [self.currentPos[0],self.currentPos[1]-1]
-        self.level.append([currentLevel, self.currentPos])
-        self.currentPos = newCurrentPos
+class worldGeneration:
+    
+    rooms = []
+    roomsToBlit = []
+    currentPosition = [1,0]
+    def __init__(self,roomAmount):
+        self.roomAmount = roomAmount
+        self.roomPaths = {
+    '1' : Room('ProcedualGeneration/rooms/1.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
+    '2NoTop' : Room('ProcedualGeneration/rooms/2NoTop.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
+    '2Top' : Room('ProcedualGeneration/rooms/2Top.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
+    '3' : Room('ProcedualGeneration/rooms/3.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
+    } 
         
-        '''
-        TODO test this
-        then work more from http://tinysubversions.com/spelunkyGen/
-        '''
+    def genWorld(self):
+        for i in range(0,self.roomAmount):
+            a = 96
+            b = 320
+            rndNum = random.randint(1,5)
+            findingEmptySpace = True
+            if rndNum == 1 or rndNum == 2:#left
+                newPos = [self.currentPosition[0]-1,self.currentPosition[1]]
+                while findingEmptySpace:
+                    while findingEmptySpace:
+                        findingEmptySpace = False
+                        if self.rooms == []:
+                            break
+                        for room in self.rooms:
+                            room = [room[0]/b,room[1]/a]
+                            if newPos == room:
+                                newPos = [newPos[0]-1,newPos[1]]
+                                findingEmptySpace = True
+                                break
+                if newPos[0] >= 0 and newPos[1] >= 0:
+                    self.currentPosition = newPos
+                    self.rooms.append([newPos[0]*b,newPos[1]*a])
+                    self.roomsToBlit.append([self.roomPaths['1'].room,(newPos[0]*b,newPos[1]*a)])
+            elif rndNum == 3 or rndNum ==4 :#right
+                newPos = [self.currentPosition[0]+1,self.currentPosition[1]]
+                while findingEmptySpace:
+                    findingEmptySpace = False
+                    if self.rooms == []:
+                        break
+                    for room in self.rooms:
+                        room = [room[0]/b,room[1]/a]
+                        if newPos == room:
 
+                            newPos = [newPos[0]+1,newPos[1]]
+                            findingEmptySpace = True
+                            break
+                if newPos[0] >= 0 and newPos[1] >= 0:
+                    self.currentPosition = newPos
+                    self.rooms.append([newPos[0]*b,newPos[1]*a])
+                    self.roomsToBlit.append([self.roomPaths['1'].room,(newPos[0]*b,newPos[1]*a)])
+            elif rndNum == 5:#down
+                newPos = [self.currentPosition[0],self.currentPosition[1]+1]
+                while findingEmptySpace:
+                    findingEmptySpace = False
+                    if self.rooms == []:
+                        break
+                    for room in self.rooms:
+                        if newPos == room:
+                            newPos = [newPos[0],newPos[1]+1]
+                            findingEmptySpace = True
+                            break    
+                if newPos[0] >= 0 and newPos[1] >= 0:
+                    if len(self.roomsToBlit)-2 > 0:
+                        aboveRoom = self.roomsToBlit[len(self.roomsToBlit)-1]
+                        if aboveRoom[0] == self.roomPaths['1'].room:
+                            self.roomsToBlit[len(self.roomsToBlit)-1][0] = self.roomPaths['2NoTop'].room
+                        elif aboveRoom[0] == self.roomPaths['3'].room:
+                            self.roomsToBlit[len(self.roomsToBlit)-1][0] = self.roomPaths['2Top'].room
+                    self.currentPosition = newPos
+                    self.rooms.append([newPos[0]*b,newPos[1]*a])
+                    self.roomsToBlit.append([self.roomPaths['3'].room,(newPos[0]*b,newPos[1]*a)])
