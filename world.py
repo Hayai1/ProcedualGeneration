@@ -164,3 +164,7 @@ class worldGeneration:
                     self.currentPosition = newPos
                     self.rooms.append([newPos[0]*b,newPos[1]*a])
                     self.roomsToBlit.append([self.roomPaths['3'].room,(newPos[0]*b,newPos[1]*a)])
+        
+        '''
+        there is a bug rigth now with the first couple of rooms so that needs fixing
+        '''
