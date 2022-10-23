@@ -1,6 +1,6 @@
 import pygame
 from world import World
-
+from player import Player
 WINDOW_SIZE = (1920,1080)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -13,7 +13,7 @@ pygame.display.set_caption("My Game")
 clock = pygame.time.Clock()
 Surface = pygame.Surface((300,200))
 worldgen = World(50)
-
+player = Player(0,0)
  
 done = False
 x = 0
@@ -65,10 +65,15 @@ while not done:
     if Up:
         y = y - 10
     Surface.fill(WHITE)
-   
+    
 
-    for room in worldgen.roomsToBlit:
-        Surface.blit(room[0],(room[1][0]-scroll[0],room[1][1]-scroll[1]))
+    for room in worldgen.rooms:
+        Surface.blit(room.roomImg,(room.x-scroll[0],room.y-scroll[1]))
+        for rect in room.rects:
+           pygame.draw.rect(Surface,RED,pygame.Rect(rect.x-scroll[0],rect.y-scroll[1],rect.width,rect.height))
+    
+    pygame.draw.rect(Surface,(0,0,255),player.rect)
+
     screen.blit(pygame.transform.scale(Surface,WINDOW_SIZE),(0,0))
     
     # --- Limit to 60 frames per second

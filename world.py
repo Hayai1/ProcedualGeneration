@@ -33,35 +33,38 @@ class SpriteSheet:
         return self.images_at(tups, colorkey)
 
 class Room:
-    def __init__(self,RoomFile,hasBottomExit,hasTopExit):
+    def __init__(self,roomType,RoomFile,loc):
         self.RoomSpriteSheet = SpriteSheet("ProcedualGeneration/roomSpriteSheet.png")
-        self.hasBottomExit = hasBottomExit
-        self.hasTopExit = hasTopExit
-        self.room = self.getRoom(RoomFile)
-        
+        self.roomType = roomType
+        self.x = loc[0]
+        self.y = loc[1]
+        self.roomImg = []
+        self.rects = []
+        self.GenerateRoom(RoomFile)
+     
     def getRoomData(self,RoomFile):
         with open(RoomFile) as data:
             return data.read()
+
 
     def addImageToArray(self,room,imglocInSpriteSheet,TileLocation):
         room.append([self.RoomSpriteSheet.image_at(imglocInSpriteSheet,BLACK),TileLocation])
         return room
 
-    def GetCoordinatesInSpriteSheet(self,ifNum,Checker,loc):#this uses recusion to find the location of the tile in the spritesheet
-        if ifNum == Checker:
-            return loc
+    def GetCoordinatesInSpriteSheet(self,Tile,location,ifNum='0'):#this uses recusion to find the location of the tile in the spritesheet
+        if ifNum == Tile:
+            return location
         else:
             ifNum = int(ifNum) + 1
-            if loc[0] == 64:
-                loc[0] = 0
-                loc[1] += 32
+            if location[0] == 64:
+                location[0] = 0
+                location[1] += 32
             else:
-                loc[0] += 32
-            return self.GetCoordinatesInSpriteSheet(str(ifNum),Checker,loc)
-
-    def getRoom(self,roomFile):
-        data = self.getRoomData(roomFile)
+                location[0] += 32
+            return self.GetCoordinatesInSpriteSheet(Tile,location,str(ifNum))
+    def GenerateRoom(self,roomFile):
         room = []
+        data = self.getRoomData(roomFile)
         xCounter = -1
         yCounter = 0
         surfaceX = 0
@@ -73,11 +76,14 @@ class Room:
                 yCounter +=1
                 xCounter =-1
             else:
-                loc = self.GetCoordinatesInSpriteSheet('0',tile,[0,0,16,16])
+                loc = self.GetCoordinatesInSpriteSheet(Tile=tile,location=[0,0,16,16])
                 self.addImageToArray(room,loc,(xCounter*16,yCounter*16))
+                if tile != '4':
+                    self.rects.append(pygame.Rect((xCounter*16)+self.x,(yCounter*16)+self.y,16,16))
         surface = pygame.Surface((surfaceX*16,yCounter*16+16))
-        return self.drawRoom(surface,room)
-    def drawRoom(self, surface,room):
+        self.roomImg = self.drawRoomOnSurface(surface,room)
+
+    def drawRoomOnSurface(self,surface,room):
         for i in room:
             surface.blit(i[0], i[1])
         return surface
@@ -90,17 +96,11 @@ a 2Top = a room witha  a left, right bottom and top exit
 a 3 = a room with a left, right and top exit
 '''
 class World:
+    nodes = []
     rooms = []
-    roomsToBlit = []
-    currentPosition = [1,0]
+    currentPosition = [0,0]
     def __init__(self,roomAmount):
         self.roomAmount = roomAmount
-        self.roomPaths = {
-                        '1' : Room('ProcedualGeneration/rooms/1.txt',hasBottomExit=False,hasTopExit=False),
-                        '2NoTop' : Room('ProcedualGeneration/rooms/2NoTop.txt',hasBottomExit=False,hasTopExit=False),
-                        '2Top' : Room('ProcedualGeneration/rooms/2Top.txt',hasBottomExit=False,hasTopExit=False),
-                        '3' : Room('ProcedualGeneration/rooms/3.txt',hasBottomExit=False,hasTopExit=False),
-                        } 
         self.genWorld()
         
     def genWorld(self):
@@ -116,9 +116,9 @@ class World:
                 while findingEmptySpace:
                     while findingEmptySpace:
                         findingEmptySpace = False
-                        if self.rooms == []:
+                        if self.nodes == []:
                             break
-                        for room in self.rooms:
+                        for room in self.nodes:
                             room = [room[0]/xMultiplier,room[1]/yMultiplier]
                             if newPos == room:
                                 newPos = [newPos[0]-1,newPos[1]]
@@ -126,15 +126,16 @@ class World:
                                 break
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
-                    self.roomsToBlit.append([self.roomPaths['1'].room,(newPos[0]*xMultiplier,newPos[1]*yMultiplier)])
+                    self.nodes.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    newRoom = Room('1','ProcedualGeneration/rooms/1.txt',loc=[newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    self.rooms.append(newRoom)
             elif rndNum == 3 or rndNum ==4 :#right
                 newPos = [self.currentPosition[0]+1,self.currentPosition[1]]
                 while findingEmptySpace:
                     findingEmptySpace = False
-                    if self.rooms == []:
+                    if self.nodes == []:
                         break
-                    for room in self.rooms:
+                    for room in self.nodes:
                         room = [room[0]/xMultiplier,room[1]/yMultiplier]
                         if newPos == room:
                             newPos = [newPos[0]+1,newPos[1]]
@@ -142,29 +143,33 @@ class World:
                             break
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
-                    self.roomsToBlit.append([self.roomPaths['1'].room,(newPos[0]*xMultiplier,newPos[1]*yMultiplier)])
+                    self.nodes.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    newRoom = Room('1','ProcedualGeneration/rooms/1.txt',loc=[newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    self.rooms.append(newRoom)
             elif rndNum == 5:#down
                 newPos = [self.currentPosition[0],self.currentPosition[1]+1]
                 while findingEmptySpace:
                     findingEmptySpace = False
-                    if self.rooms == []:
+                    if self.nodes == []:
                         break
-                    for room in self.rooms:
+                    for room in self.nodes:
                         if newPos == room:
                             newPos = [newPos[0],newPos[1]+1]
                             findingEmptySpace = True
                             break    
                 if newPos[0] >= 0 and newPos[1] >= 0:
-                    if len(self.roomsToBlit)-2 > 0:
-                        aboveRoom = self.roomsToBlit[len(self.roomsToBlit)-1]
-                        if aboveRoom[0] == self.roomPaths['1'].room:
-                            self.roomsToBlit[len(self.roomsToBlit)-1][0] = self.roomPaths['2NoTop'].room
-                        elif aboveRoom[0] == self.roomPaths['3'].room:
-                            self.roomsToBlit[len(self.roomsToBlit)-1][0] = self.roomPaths['2Top'].room
+                    if len(self.rooms)-2 > 0:
+                        aboveRoom = self.rooms[len(self.rooms)-1]
+                        if aboveRoom.roomType == '1':
+                            newRoom = Room('2NoTop','ProcedualGeneration/rooms/2NoTop.txt',loc=[aboveRoom.x,aboveRoom.y])
+                            self.rooms[len(self.rooms)-1] = newRoom
+                        elif aboveRoom.roomType == '3':
+                            newRoom = Room('2Top','ProcedualGeneration/rooms/2Top.txt',loc=[aboveRoom.x,aboveRoom.y])
+                            self.rooms[len(self.rooms)-1] = newRoom
                     self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
-                    self.roomsToBlit.append([self.roomPaths['3'].room,(newPos[0]*xMultiplier,newPos[1]*yMultiplier)])
+                    self.nodes.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    newRoom = Room('3','ProcedualGeneration/rooms/3.txt',loc=[newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    self.rooms.append(newRoom)
         
         '''
         there is a bug rigth now with the first couple of rooms so that needs fixing
