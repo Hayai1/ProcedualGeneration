@@ -50,6 +50,38 @@ class Room:
     def addImageToArray(self,room,imglocInSpriteSheet,TileLocation):
         room.append([self.RoomSpriteSheet.image_at(imglocInSpriteSheet,BLACK),TileLocation])
         return room
+
+    def GetCoordinatesInSpriteSheet(self,ifNum,Checker,loc):#this uses recusion to find the location of the tile in the spritesheet
+        if ifNum == Checker:
+            return loc
+        else:
+            ifNum = int(ifNum) + 1
+            if loc[0] == 64:
+                loc[0] = 0
+                loc[1] += 32
+            else:
+                loc[0] += 32
+            return self.GetCoordinatesInSpriteSheet(str(ifNum),Checker,loc)
+
+    def getRoom(self,roomFile):
+        data = self.getRoomData(roomFile)
+        room = []
+        xCounter = -1
+        yCounter = 0
+        surfaceX = 0
+        for tile in data:
+            xCounter += 1
+            if tile == '\n':
+                if surfaceX < xCounter:
+                    surfaceX = xCounter
+                yCounter +=1
+                xCounter =-1
+            else:
+                loc = self.GetCoordinatesInSpriteSheet('0',tile,[0,0,16,16])
+                self.addImageToArray(room,loc,(xCounter*16,yCounter*16))
+        surface = pygame.Surface((surfaceX*16,yCounter*16+16))
+        return self.drawRoom(surface,room)
+    '''
     def getRoom(self,roomFile):
         room = []
         data = self.getRoomData(roomFile)
@@ -65,9 +97,9 @@ class Room:
             elif tile == '2':
                 self.addImageToArray(room,(64,0,16,16),(xCounter*16,yCounter*16))
             elif tile == '3':
-                self.addImageToArray(room,(32,0,16,16),(xCounter*16,yCounter*16))
+                self.addImageToArray(room,(0,32,16,16),(xCounter*16,yCounter*16))
             elif tile == '4':
-                self.addImageToArray(room,(32,0,16,16),(xCounter*16,yCounter*16))
+                self.addImageToArray(room,(32,32,16,16),(xCounter*16,yCounter*16))
             elif tile == '5':
                 self.addImageToArray(room,(64,32,16,16),(xCounter*16,yCounter*16))
             elif tile == '6':
@@ -76,8 +108,6 @@ class Room:
                 self.addImageToArray(room,(32,64,16,16),(xCounter*16,yCounter*16))
             elif tile == '8':
                 self.addImageToArray(room,(64,64,16,16),(xCounter*16,yCounter*16))
-            elif tile == '9':
-                self.addImageToArray(room,(128,32,16,16),(xCounter*16,yCounter*16))     
             elif tile == '\n':
                 if surfaceX < xCounter:
                     surfaceX = xCounter
@@ -86,7 +116,7 @@ class Room:
 
         surface = pygame.Surface((surfaceX*16,yCounter*16+16))
         return self.drawRoom(surface,room)
-            
+        '''
     def drawRoom(self, surface,room):
         for i in room:
             surface.blit(i[0], i[1])
