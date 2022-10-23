@@ -3,6 +3,13 @@ import random
 BLACK = (0, 0, 0)
 
 class SpriteSheet:
+    def __init__(self,spriteSheetFile):
+        """Load the sheet."""
+        try:
+            self.sheet = pygame.image.load(spriteSheetFile).convert()
+        except pygame.error as e:
+            print(f"Unable to load spritesheet image: {spriteSheetFile}")
+            raise SystemExit(e)
     def image_at(self, rectangle, colorkey = None):
         """Load a specific image from a specific rectangle."""
         # Loads image from x, y, x+offset, y+offset.
@@ -29,23 +36,20 @@ class SpriteSheet:
 
 
 
-class Room(SpriteSheet):
-    def __init__(self, RoomFile,spriteSheetFile,hasBottomExit,hasTopExit):
-        """Load the sheet."""
-        try:
-            self.sheet = pygame.image.load(spriteSheetFile).convert()
-        except pygame.error as e:
-            print(f"Unable to load spritesheet image: {spriteSheetFile}")
-            raise SystemExit(e)
-        self.room = self.getRoom(RoomFile)
+class Room:
+    def __init__(self,RoomFile,hasBottomExit,hasTopExit):
+        self.RoomSpriteSheet = SpriteSheet("ProcedualGeneration/roomSpriteSheet.png")
         self.hasBottomExit = hasBottomExit
         self.hasTopExit = hasTopExit
-
+        self.room = self.getRoom(RoomFile)
+        
     def getRoomData(self,RoomFile):
         with open(RoomFile) as data:
             return data.read()
 
-
+    def addImageToArray(self,room,imglocInSpriteSheet,TileLocation):
+        room.append([self.RoomSpriteSheet.image_at(imglocInSpriteSheet,BLACK),TileLocation])
+        return room
     def getRoom(self,roomFile):
         room = []
         data = self.getRoomData(roomFile)
@@ -55,25 +59,25 @@ class Room(SpriteSheet):
         for tile in data:
             xCounter += 1
             if tile == '0':
-                room.append([self.image_at((0,0,16,16),BLACK),(xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(0,0,16,16),(xCounter*16,yCounter*16))
             elif tile == '1':
-                room.append([self.image_at((32,0,16,16),BLACK),(xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(32,0,16,16),(xCounter*16,yCounter*16))
             elif tile == '2':
-                room.append([self.image_at((64,0,16,16),BLACK),(xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(64,0,16,16),(xCounter*16,yCounter*16))
             elif tile == '3':
-                room.append([self.image_at((0,32,16,16),BLACK), (xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(32,0,16,16),(xCounter*16,yCounter*16))
             elif tile == '4':
-                room.append([self.image_at((32,32,16,16),BLACK), (xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(32,0,16,16),(xCounter*16,yCounter*16))
             elif tile == '5':
-                room.append([self.image_at((64,32,16,16),BLACK), (xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(64,32,16,16),(xCounter*16,yCounter*16))
             elif tile == '6':
-                room.append([self.image_at((0,64,16,16),BLACK), (xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(0,64,16,16),(xCounter*16,yCounter*16))
             elif tile == '7':
-                room.append([self.image_at((32,64,16,16),BLACK), (xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(32,64,16,16),(xCounter*16,yCounter*16))
             elif tile == '8':
-                room.append([self.image_at((64,64,16,16),BLACK), (xCounter*16,yCounter*16)])
+                self.addImageToArray(room,(64,64,16,16),(xCounter*16,yCounter*16))
             elif tile == '9':
-                room.append([self.image_at((128,32,16,16),BLACK), (xCounter*16,yCounter*16)])     
+                self.addImageToArray(room,(128,32,16,16),(xCounter*16,yCounter*16))     
             elif tile == '\n':
                 if surfaceX < xCounter:
                     surfaceX = xCounter
@@ -87,21 +91,27 @@ class Room(SpriteSheet):
         for i in room:
             surface.blit(i[0], i[1])
         return surface
-    
 
-class worldGeneration:
-    
+
+'''
+a 1 room = a room with a left and right exit
+a 2NoTop = a room with a left, right and bottom exit
+a 2Top = a room witha  a left, right bottom and top exit
+a 3 = a room with a left, right and top exit
+'''
+class World:
     rooms = []
     roomsToBlit = []
     currentPosition = [1,0]
     def __init__(self,roomAmount):
         self.roomAmount = roomAmount
         self.roomPaths = {
-    '1' : Room('ProcedualGeneration/rooms/1.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
-    '2NoTop' : Room('ProcedualGeneration/rooms/2NoTop.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
-    '2Top' : Room('ProcedualGeneration/rooms/2Top.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
-    '3' : Room('ProcedualGeneration/rooms/3.txt','ProcedualGeneration/SpriteSheet.png',hasBottomExit=False,hasTopExit=False),
-    } 
+                        '1' : Room('ProcedualGeneration/rooms/1.txt',hasBottomExit=False,hasTopExit=False),
+                        '2NoTop' : Room('ProcedualGeneration/rooms/2NoTop.txt',hasBottomExit=False,hasTopExit=False),
+                        '2Top' : Room('ProcedualGeneration/rooms/2Top.txt',hasBottomExit=False,hasTopExit=False),
+                        '3' : Room('ProcedualGeneration/rooms/3.txt',hasBottomExit=False,hasTopExit=False),
+                        } 
+        self.genWorld()
         
     def genWorld(self):
         for i in range(0,self.roomAmount):

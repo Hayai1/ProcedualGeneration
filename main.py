@@ -1,5 +1,5 @@
 import pygame
-from world import worldGeneration
+from world import World
 
 WINDOW_SIZE = (700,500)
 BLACK = (0, 0, 0)
@@ -12,8 +12,8 @@ screen = pygame.display.set_mode(WINDOW_SIZE)
 pygame.display.set_caption("My Game")
 clock = pygame.time.Clock()
 Surface = pygame.Surface((300,200))
-worldgen = worldGeneration(50)
-worldgen.genWorld() 
+worldgen = World(50)
+
  
 done = False
 x = 0
