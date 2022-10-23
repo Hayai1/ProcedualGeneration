@@ -32,10 +32,6 @@ class SpriteSheet:
                 for x in range(image_count)]
         return self.images_at(tups, colorkey)
 
-    
-
-
-
 class Room:
     def __init__(self,RoomFile,hasBottomExit,hasTopExit):
         self.RoomSpriteSheet = SpriteSheet("ProcedualGeneration/roomSpriteSheet.png")
@@ -109,8 +105,10 @@ class World:
         
     def genWorld(self):
         for i in range(0,self.roomAmount):
-            a = 96
-            b = 320
+            roomLength = 20
+            roomHeight = 8
+            xMultiplier = roomLength*16
+            yMultiplier = roomHeight*16
             rndNum = random.randint(1,5)
             findingEmptySpace = True
             if rndNum == 1 or rndNum == 2:#left
@@ -121,15 +119,15 @@ class World:
                         if self.rooms == []:
                             break
                         for room in self.rooms:
-                            room = [room[0]/b,room[1]/a]
+                            room = [room[0]/xMultiplier,room[1]/yMultiplier]
                             if newPos == room:
                                 newPos = [newPos[0]-1,newPos[1]]
                                 findingEmptySpace = True
                                 break
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*b,newPos[1]*a])
-                    self.roomsToBlit.append([self.roomPaths['1'].room,(newPos[0]*b,newPos[1]*a)])
+                    self.rooms.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    self.roomsToBlit.append([self.roomPaths['1'].room,(newPos[0]*xMultiplier,newPos[1]*yMultiplier)])
             elif rndNum == 3 or rndNum ==4 :#right
                 newPos = [self.currentPosition[0]+1,self.currentPosition[1]]
                 while findingEmptySpace:
@@ -137,16 +135,15 @@ class World:
                     if self.rooms == []:
                         break
                     for room in self.rooms:
-                        room = [room[0]/b,room[1]/a]
+                        room = [room[0]/xMultiplier,room[1]/yMultiplier]
                         if newPos == room:
-
                             newPos = [newPos[0]+1,newPos[1]]
                             findingEmptySpace = True
                             break
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*b,newPos[1]*a])
-                    self.roomsToBlit.append([self.roomPaths['1'].room,(newPos[0]*b,newPos[1]*a)])
+                    self.rooms.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    self.roomsToBlit.append([self.roomPaths['1'].room,(newPos[0]*xMultiplier,newPos[1]*yMultiplier)])
             elif rndNum == 5:#down
                 newPos = [self.currentPosition[0],self.currentPosition[1]+1]
                 while findingEmptySpace:
@@ -166,8 +163,8 @@ class World:
                         elif aboveRoom[0] == self.roomPaths['3'].room:
                             self.roomsToBlit[len(self.roomsToBlit)-1][0] = self.roomPaths['2Top'].room
                     self.currentPosition = newPos
-                    self.rooms.append([newPos[0]*b,newPos[1]*a])
-                    self.roomsToBlit.append([self.roomPaths['3'].room,(newPos[0]*b,newPos[1]*a)])
+                    self.rooms.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    self.roomsToBlit.append([self.roomPaths['3'].room,(newPos[0]*xMultiplier,newPos[1]*yMultiplier)])
         
         '''
         there is a bug rigth now with the first couple of rooms so that needs fixing
