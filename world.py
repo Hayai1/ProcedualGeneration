@@ -127,7 +127,7 @@ class World:
                 if newPos[0] >= 0 and newPos[1] >= 0:
                     self.currentPosition = newPos
                     self.nodes.append([newPos[0]*xMultiplier,newPos[1]*yMultiplier])
-                    newRoom = Room('1','ProcedualGeneration/rooms/1.txt',loc=[newPos[0]*xMultiplier,newPos[1]*yMultiplier])
+                    newRoom = Room('1','ProcedualGeneration/rooms/1.txt',loc=[(newPos[0]*xMultiplier),newPos[1]*yMultiplier])
                     self.rooms.append(newRoom)
             elif rndNum == 3 or rndNum ==4 :#right
                 newPos = [self.currentPosition[0]+1,self.currentPosition[1]]
