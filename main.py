@@ -18,7 +18,6 @@ player = Player(0,0)
  
 done = False
 true_scroll = [0,0]
-
 # -------- Main Program Loop -----------
 while not done:
     screen.fill(BLACK)
@@ -31,8 +30,6 @@ while not done:
                 player.left = True
             if event.key == pygame.K_RIGHT:
                 player.right = True
-            if event.key == pygame.K_DOWN:
-                player.down = True
             if event.key == pygame.K_UP:
                 player.up = True
         if event.type == pygame.KEYUP:
@@ -40,8 +37,6 @@ while not done:
                 player.left = False
             if event.key == pygame.K_RIGHT:
                 player.right= False
-            if event.key == pygame.K_DOWN:
-                player.down = False
             if event.key == pygame.K_UP:
                 player.up = False
                 
@@ -52,13 +47,13 @@ while not done:
     scroll[1] = int(scroll[1])
 
     surface.fill(WHITE)
-    
-
+    rects = []
     for room in worldgen.rooms:
         surface.blit(room.roomImg,(room.x-scroll[0],room.y-scroll[1]))
         for rect in room.rects:
-           pygame.draw.rect(surface,RED,pygame.Rect(rect.x-scroll[0],rect.y-scroll[1],rect.width,rect.height))
-    player.move()
+            pygame.draw.rect(surface,RED,pygame.Rect(rect.x-scroll[0],rect.y-scroll[1],rect.width,rect.height))
+            rects.append(rect)
+    player.move(rects)
     player.drawPlayer(surface,scroll)
 
     screen.blit(pygame.transform.scale(surface,WINDOW_SIZE),(0,0))
