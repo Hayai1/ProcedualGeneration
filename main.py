@@ -31,14 +31,14 @@ while not done:
             if event.key == pygame.K_RIGHT:
                 player.right = True
             if event.key == pygame.K_UP:
-                player.up = True
+                player.jump = True
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 player.left = False
             if event.key == pygame.K_RIGHT:
                 player.right= False
             if event.key == pygame.K_UP:
-                player.up = False
+                player.jump = False
                 
     true_scroll[0] += (player.rect.x-true_scroll[0]-152)/20 
     true_scroll[1] += (player.rect.y-true_scroll[1]-106)/20
